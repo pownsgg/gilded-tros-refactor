@@ -3,68 +3,75 @@ package com.gildedtros;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@AllArgsConstructor
 @Data
+@AllArgsConstructor
 class GildedTros {
     private final Item[] items;
 
     public void updateQuality() {
-	    for (Item item : items) {
-            String itemName = item.getName();
-            int itemQuality = item.getQuality();
-            int itemSellIn = item.getSellIn();
-
-		    if (!itemName.equals("Good Wine")
-			    && !itemName.equals("Backstage passes for Re:Factor")
-			    && !itemName.equals("Backstage passes for HAXX")) {
-			    if (itemQuality > 0) {
-				    if (!itemName.equals("B-DAWG Keychain")) {
-					    itemQuality = itemQuality - 1;
-				    }
-			    }
-		    } else {
-			    if (itemQuality < 50) {
-				    itemQuality = itemQuality + 1;
-
-				    if (itemName.equals("Backstage passes for Re:Factor") || itemName.equals("Backstage passes for HAXX")) {
-					    if (itemSellIn < 11) {
-						    if (itemQuality < 50) {
-							    itemQuality = itemQuality + 1;
-						    }
-					    }
-
-					    if (itemSellIn < 6) {
-						    if (itemQuality < 50) {
-							    itemQuality = itemQuality + 1;
-						    }
-					    }
-				    }
-			    }
-		    }
-
-		    if (!itemName.equals("B-DAWG Keychain")) {
-			    itemSellIn = itemSellIn - 1;
-		    }
-
-		    if (itemSellIn < 0) {
-			    if (!itemName.equals("Good Wine")) {
-				    if (!itemName.equals("Backstage passes for Re:Factor") && !itemName.equals("Backstage passes for HAXX")) {
-					    if (itemQuality > 0) {
-						    if (!itemName.equals("B-DAWG Keychain")) {
-							    itemQuality = itemQuality - 1;
-						    }
-					    }
-				    } else {
-					    itemQuality = itemQuality - itemQuality;
-				    }
-			    } else {
-				    if (itemQuality < 50) {
-					    itemQuality = itemQuality + 1;
-				    }
-			    }
-		    }
-
-            // TODO: Update item objects
+	    for (Item item : this.items) {
+            this.updateItemQuality(item);
 	    }
     }
+
+	private void updateItemQuality(Item item) {
+		switch(item.getItemType()) {
+			case AGED_QUALITY_INCREASE:
+				this.increaseQuality(item);
+				break;
+			case BACKSTAGE_PASS:
+				this.updateBackstagePass(item);
+				break;
+			case LEGENDARY:
+				return;
+			case REGULAR:
+				this.decreaseQuality(item);
+				break;
+		}
+
+		item.setSellIn(item.getSellIn() - 1);
+		this.handleExpiredItem(item);
+	}
+
+	private void increaseQuality(Item item) {
+		if (item.getQuality() < 50) {
+			item.setQuality(item.getQuality() + 1);
+		}
+	}
+
+	private void decreaseQuality(Item item) {
+		if (item.getQuality() > 0) {
+			item.setQuality(item.getQuality() - 1);
+		}
+	}
+
+	private void updateBackstagePass(Item item) {
+		this.increaseQuality(item);
+
+		if (item.getSellIn() <= 10) {
+			this.increaseQuality(item);
+		}
+
+		if (item.getSellIn() <= 5) {
+			this.increaseQuality(item);
+		}
+	}
+
+	private void handleExpiredItem(Item item) {
+		if (item.getSellIn() >= 0) {
+			return;
+		}
+
+		switch (item.getItemType()) {
+			case AGED_QUALITY_INCREASE:
+				this.increaseQuality(item);
+				break;
+			case BACKSTAGE_PASS:
+				item.setQuality(0);
+				break;
+			default:
+				this.decreaseQuality(item);
+				break;
+		}
+	}
 }
