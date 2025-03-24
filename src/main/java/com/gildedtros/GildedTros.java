@@ -1,9 +1,7 @@
 package com.gildedtros;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 
-@Data
 @AllArgsConstructor
 class GildedTros {
     private final Item[] items;
@@ -15,6 +13,7 @@ class GildedTros {
     }
 
 	private void updateItemQuality(Item item) {
+		// Item type specific quality handling
 		switch(item.getItemType()) {
 			case AGED_QUALITY_INCREASE:
 				this.increaseQuality(item);
@@ -23,6 +22,8 @@ class GildedTros {
 				this.updateBackstagePass(item);
 				break;
 			case LEGENDARY:
+				// Early return.
+				// Legendary items never change their quality or days of sale left.
 				return;
 			case REGULAR:
 				this.decreaseQuality(item);
@@ -30,19 +31,9 @@ class GildedTros {
 		}
 
 		item.setSellIn(item.getSellIn() - 1);
+
+		// Handle expiration logic based on item type
 		this.handleExpiredItem(item);
-	}
-
-	private void increaseQuality(Item item) {
-		if (item.getQuality() < 50) {
-			item.setQuality(item.getQuality() + 1);
-		}
-	}
-
-	private void decreaseQuality(Item item) {
-		if (item.getQuality() > 0) {
-			item.setQuality(item.getQuality() - 1);
-		}
 	}
 
 	private void updateBackstagePass(Item item) {
@@ -72,6 +63,19 @@ class GildedTros {
 			default:
 				this.decreaseQuality(item);
 				break;
+		}
+	}
+
+	// Safe quality increase and decrease helper methods
+	private void increaseQuality(Item item) {
+		if (item.getQuality() < 50) {
+			item.setQuality(item.getQuality() + 1);
+		}
+	}
+
+	private void decreaseQuality(Item item) {
+		if (item.getQuality() > 0) {
+			item.setQuality(item.getQuality() - 1);
 		}
 	}
 }
