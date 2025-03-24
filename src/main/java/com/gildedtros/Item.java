@@ -1,23 +1,16 @@
 package com.gildedtros;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class Item {
     private String name;
-    private ItemType itemType;
+
+    @Builder.Default
+    private ItemType itemType = ItemType.REGULAR;
+
     private int sellIn;
     private int quality;
-
-    public Item(String name, int sellIn, int quality) {
-        this(name, ItemType.REGULAR, sellIn, quality);
-    }
-
-    public Item(String name, ItemType itemType, int sellIn, int quality) {
-        this.name = name;
-        this.itemType = itemType;
-        this.sellIn = sellIn;
-        this.quality = quality;
-    }
 }
